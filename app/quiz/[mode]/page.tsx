@@ -12,7 +12,15 @@ export function generateStaticParams() {
   return MODES.map((mode) => ({ mode }));
 }
 
-export default async function QuizModePage({ params }: PageProps<"/quiz/[mode]">) {
+export default function QuizModePage({ params }: PageProps<"/quiz/[mode]">) {
+  return (
+    <Suspense fallback={<CardSkeleton lines={6} />}>
+      <QuizModeContent params={params} />
+    </Suspense>
+  );
+}
+
+async function QuizModeContent({ params }: { params: PageProps<"/quiz/[mode]">["params"] }) {
   const { mode } = await params;
   if (!MODES.includes(mode as AnyMode)) notFound();
   const m = mode as AnyMode;

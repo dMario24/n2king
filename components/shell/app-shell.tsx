@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 import { BottomTabs } from "./bottom-tabs";
 import { FocusBadge } from "@/components/focus/focus-badge";
+import { RegisterSW } from "./register-sw";
 
 /** 서버 컴포넌트 셸: 데스크톱 사이드바 + 본문 + 모바일 하단 탭 */
 export function AppShell({ children }: { children: ReactNode }) {
@@ -15,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
       <BottomTabs />
       <FocusBadge />
+      <RegisterSW />
     </div>
   );
 }

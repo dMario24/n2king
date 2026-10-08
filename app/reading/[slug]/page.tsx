@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { CardSkeleton } from "@/components/ui/skeleton";
 import { Jp } from "@/components/jp";
 import { ReadingQuestions } from "@/components/reading/reading-questions";
 import { Card } from "@/components/ui/card";
@@ -10,7 +12,15 @@ export function generateStaticParams() {
   return READING.map((r) => ({ slug: slugOf(r.id) }));
 }
 
-export default async function ReadingPage({ params }: PageProps<"/reading/[slug]">) {
+export default function ReadingPage({ params }: PageProps<"/reading/[slug]">) {
+  return (
+    <Suspense fallback={<CardSkeleton lines={10} />}>
+      <ReadingContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ReadingContent({ params }: { params: PageProps<"/reading/[slug]">["params"] }) {
   const { slug } = await params;
   const passage = READING.find((r) => slugOf(r.id) === slug);
   if (!passage) notFound();

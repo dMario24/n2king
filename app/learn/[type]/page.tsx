@@ -21,7 +21,16 @@ export function generateStaticParams() {
   return TYPES.map((type) => ({ type }));
 }
 
-export default async function LearnTypePage({ params }: PageProps<"/learn/[type]">) {
+/** params 는 Suspense 안의 자식에서 await 해야 내비게이션이 즉시(instant) 유지된다 */
+export default function LearnTypePage({ params }: PageProps<"/learn/[type]">) {
+  return (
+    <Suspense fallback={<CardSkeleton lines={8} />}>
+      <LearnTypeContent params={params} />
+    </Suspense>
+  );
+}
+
+async function LearnTypeContent({ params }: { params: PageProps<"/learn/[type]">["params"] }) {
   const { type } = await params;
   if (!TYPES.includes(type as T)) notFound();
   const t = type as T;
