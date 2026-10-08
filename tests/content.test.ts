@@ -63,6 +63,9 @@ describe("전체 id 유일성", () => {
 });
 
 describe("어휘", () => {
+  it("표기+읽기가 같은 중복 단어가 없다", () => {
+    expectUnique(VOCAB.map((v) => `${v.word}|${v.reading}`), "vocab word");
+  });
   it("필수 필드와 주차 범위", () => {
     for (const v of VOCAB) {
       expect(v.word.length, v.id).toBeGreaterThan(0);
