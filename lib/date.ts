@@ -40,3 +40,8 @@ export function formatKoDate(dateStr: string): string {
   const w = ["일", "월", "화", "수", "목", "금", "토"][d.getDay()];
   return `${d.getMonth() + 1}월 ${d.getDate()}일 (${w})`;
 }
+
+/** 이벤트 핸들러 안에서 현재 시각을 읽을 때 사용 (렌더 중 호출 금지) */
+export function nowMs(): number {
+  return Date.now();
+}
