@@ -1,13 +1,24 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card } from "@/components/ui/card";
+import { Suspense } from "react";
+import { ClientOnly } from "@/components/client-only";
+import { Dashboard } from "@/components/dashboard/dashboard";
+import { CardSkeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   return (
-    <>
-      <PageHeader title="N2King" description="JLPT N2 · 2026년 12월 6일 합격을 향해" />
-      <Card>
-        <p className="text-sm text-muted">대시보드는 다음 단계에서 채워집니다.</p>
-      </Card>
-    </>
+    <Suspense
+      fallback={
+        <div className="grid gap-4 md:grid-cols-[1fr_320px]">
+          <div className="flex flex-col gap-4">
+            <CardSkeleton lines={2} />
+            <CardSkeleton lines={4} />
+          </div>
+          <CardSkeleton lines={4} />
+        </div>
+      }
+    >
+      <ClientOnly>
+        <Dashboard />
+      </ClientOnly>
+    </Suspense>
   );
 }
