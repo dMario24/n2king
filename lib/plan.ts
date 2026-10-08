@@ -84,6 +84,11 @@ function sortInventory(items: InventoryItem[]): InventoryItem[] {
   return [...items].sort((a, b) => a.week - b.week || a.priority - b.priority);
 }
 
+/** "reading:w3-01" → "w3-01" (URL 세그먼트용) */
+export function slugOf(id: string): string {
+  return id.slice(id.indexOf(":") + 1);
+}
+
 /** 간단 결정적 해시 (날짜별 로테이션용) */
 function hash(s: string): number {
   let h = 0;
@@ -191,14 +196,14 @@ export function generateDayPlan(input: PlanInput): DayPlan {
       const pool = input.readings.filter((r) => r.week <= week.week);
       if (pool.length) {
         const r = pool[(dayIdx + hash("r")) % pool.length];
-        tasks.push({ kind: "reading", id: "reading", title: "독해 1편", refId: r.id, estMin: 10, href: `/reading/${encodeURIComponent(r.id)}` });
+        tasks.push({ kind: "reading", id: "reading", title: "독해 1편", refId: r.id, estMin: 10, href: `/reading/${slugOf(r.id)}` });
       }
     }
     if (week.extras.includes("listening") && input.listenings?.length) {
       const pool = input.listenings.filter((l) => l.week <= week.week);
       if (pool.length) {
         const l = pool[(dayIdx + hash("l")) % pool.length];
-        tasks.push({ kind: "listening", id: "listening", title: "청해 1문제", refId: l.id, estMin: 8, href: `/listening/${encodeURIComponent(l.id)}` });
+        tasks.push({ kind: "listening", id: "listening", title: "청해 1문제", refId: l.id, estMin: 8, href: `/listening/${slugOf(l.id)}` });
       }
     }
     if (week.extras.includes("mock") && input.mocks?.length) {
@@ -206,7 +211,7 @@ export function generateDayPlan(input: PlanInput): DayPlan {
       const offset = daysBetween(week.start, today);
       if (offset % 2 === 0) {
         const m = input.mocks[Math.min(input.mocks.length - 1, Math.floor(offset / 2))];
-        tasks.push({ kind: "mock", id: "mock", title: "모의고사", refId: m.id, estMin: 70, href: `/mock/${encodeURIComponent(m.id)}` });
+        tasks.push({ kind: "mock", id: "mock", title: "모의고사", refId: m.id, estMin: 70, href: `/mock/${slugOf(m.id)}` });
       }
     }
     if (week.extras.includes("mistakes") && (input.mistakeCount ?? 0) > 0) {

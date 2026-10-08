@@ -44,6 +44,16 @@ export interface Daily {
   tasksDone: string[];
 }
 
+export interface MockResult {
+  id?: number;
+  mockId: string;
+  ts: number;
+  /** 섹션별 정답/문항 수 */
+  sections: { kind: string; correct: number; total: number }[];
+  correct: number;
+  total: number;
+}
+
 export interface Settings {
   examDate: string;
   startDate: string;
@@ -75,6 +85,7 @@ export class N2Db extends Dexie {
   mistakes!: EntityTable<Mistake, "id">;
   daily!: EntityTable<Daily, "date">;
   settings!: EntityTable<SettingRow, "key">;
+  mockResults!: EntityTable<MockResult, "id">;
 
   constructor() {
     super("n2king");
@@ -84,6 +95,9 @@ export class N2Db extends Dexie {
       mistakes: "id, lastTs, resolvedAt, contentId, source",
       daily: "date",
       settings: "key",
+    });
+    this.version(2).stores({
+      mockResults: "++id, mockId, ts",
     });
   }
 }
@@ -218,39 +232,42 @@ export async function resolveMistake(id: string, resolved = true) {
 
 export interface ExportBundle {
   app: "n2king";
-  version: 1;
+  version: 1 | 2;
   exportedAt: string;
   cards: Card[];
   reviews: ReviewLog[];
   mistakes: Mistake[];
   daily: Daily[];
   settings: SettingRow[];
+  mockResults?: MockResult[];
 }
 
 export async function exportAll(): Promise<ExportBundle> {
   const db = getDb();
-  const [cards, reviews, mistakes, daily, settings] = await Promise.all([
+  const [cards, reviews, mistakes, daily, settings, mockResults] = await Promise.all([
     db.cards.toArray(),
     db.reviews.toArray(),
     db.mistakes.toArray(),
     db.daily.toArray(),
     db.settings.toArray(),
+    db.mockResults.toArray(),
   ]);
-  return { app: "n2king", version: 1, exportedAt: new Date().toISOString(), cards, reviews, mistakes, daily, settings };
+  return { app: "n2king", version: 2, exportedAt: new Date().toISOString(), cards, reviews, mistakes, daily, settings, mockResults };
 }
 
 export function validateBundle(x: unknown): x is ExportBundle {
   if (!x || typeof x !== "object") return false;
   const b = x as Partial<ExportBundle>;
-  return b.app === "n2king" && b.version === 1 && Array.isArray(b.cards) && Array.isArray(b.daily);
+  return b.app === "n2king" && (b.version === 1 || b.version === 2) && Array.isArray(b.cards) && Array.isArray(b.daily);
 }
 
 /** 가져오기: 기존 데이터를 모두 지우고 번들로 교체 */
 export async function importAll(bundle: ExportBundle) {
   const db = getDb();
-  await db.transaction("rw", db.cards, db.reviews, db.mistakes, db.daily, db.settings, async () => {
-    await Promise.all([db.cards.clear(), db.reviews.clear(), db.mistakes.clear(), db.daily.clear(), db.settings.clear()]);
+  await db.transaction("rw", [db.cards, db.reviews, db.mistakes, db.daily, db.settings, db.mockResults], async () => {
+    await Promise.all([db.cards.clear(), db.reviews.clear(), db.mistakes.clear(), db.daily.clear(), db.settings.clear(), db.mockResults.clear()]);
     await db.cards.bulkPut(bundle.cards);
+    await db.mockResults.bulkAdd((bundle.mockResults ?? []).map((r) => ({ mockId: r.mockId, ts: r.ts, sections: r.sections, correct: r.correct, total: r.total })));
     await db.reviews.bulkAdd((bundle.reviews ?? []).map((r) => ({ cardId: r.cardId, ts: r.ts, grade: r.grade, elapsedMs: r.elapsedMs })));
     await db.mistakes.bulkPut(bundle.mistakes ?? []);
     await db.daily.bulkPut(bundle.daily);
@@ -260,7 +277,11 @@ export async function importAll(bundle: ExportBundle) {
 
 export async function resetAll() {
   const db = getDb();
-  await db.transaction("rw", db.cards, db.reviews, db.mistakes, db.daily, db.settings, async () => {
-    await Promise.all([db.cards.clear(), db.reviews.clear(), db.mistakes.clear(), db.daily.clear(), db.settings.clear()]);
+  await db.transaction("rw", [db.cards, db.reviews, db.mistakes, db.daily, db.settings, db.mockResults], async () => {
+    await Promise.all([db.cards.clear(), db.reviews.clear(), db.mistakes.clear(), db.daily.clear(), db.settings.clear(), db.mockResults.clear()]);
   });
+}
+
+export async function saveMockResult(r: Omit<MockResult, "id">) {
+  await getDb().mockResults.add(r);
 }
