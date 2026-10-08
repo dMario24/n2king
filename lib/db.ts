@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS: Settings = {
   startDate: START_DATE_DEFAULT,
   intensity: "normal",
   quickBatch: 10,
-  ttsRate: 0.95,
+  ttsRate: 1,
   onboardingDone: false,
 };
 

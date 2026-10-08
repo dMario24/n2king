@@ -92,7 +92,7 @@ export function SettingsForm() {
                 onChange={(e) => setSetting("ttsVoice", e.target.value || undefined)}
                 className="mt-1 h-10 w-full rounded-xl border border-border bg-surface px-2"
               >
-                <option value="">자동 (첫 번째 일본어 음성)</option>
+                <option value="">자동 (가장 자연스러운 음성 추천)</option>
                 {voices.map((v) => (
                   <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>
                 ))}
