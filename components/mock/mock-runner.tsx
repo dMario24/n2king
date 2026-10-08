@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Jp } from "@/components/jp";
 import { MCQuestionView } from "@/components/content/mc-question";
-import { SpeakButton } from "@/components/content/speak-button";
+import { ScriptPlayButton } from "@/components/content/script-play-button";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress";
@@ -170,7 +170,7 @@ export function MockRunner({ exam }: { exam: MockExam }) {
           <Card key={q.id}>
             {section.kind === "choukai" && section.scripts?.[i] && (
               <div className="mb-3 flex items-center gap-3 rounded-xl bg-surface-2 p-3 text-sm">
-                <SpeakButton text={section.scripts[i].replace(/^(男|女|N|ナレーター)：/gm, "")} />
+                <ScriptPlayButton script={section.scripts[i]} />
                 <span className="text-muted">재생 버튼을 눌러 대화를 들으세요 (실전처럼 1회 권장)</span>
               </div>
             )}

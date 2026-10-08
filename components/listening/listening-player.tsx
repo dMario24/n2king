@@ -27,7 +27,7 @@ export function ListeningPlayer({ script }: { script: ListeningScript }) {
   async function play() {
     setPlaying(true);
     setPlays((n) => n + 1);
-    await speakLines(script.lines.map((l) => l.ja), { rate: settings.ttsRate, voiceURI: settings.ttsVoice });
+    await speakLines(script.lines.map((l) => ({ text: l.ja, speaker: l.speaker })), { rate: settings.ttsRate, voiceURI: settings.ttsVoice });
     setPlaying(false);
   }
 
